@@ -1,6 +1,6 @@
 import { FilterValues, Task } from './App.tsx';
 import { Button } from './Button.tsx';
-import { useRef } from 'react';
+import { useState } from 'react';
 
 type Props = {
 	title: string
@@ -11,19 +11,19 @@ type Props = {
 }
 
 export const TodolistItem = ({ tasks, title, deleteTask, changeFilter, createTask }: Props) => {
-	const inputRef = useRef<HTMLInputElement>(null);
+	const [taskTitle, setTaskTitle] = useState('');
+
+	const createTaskHandler =  () => {
+		createTask(taskTitle);
+		setTaskTitle('');
+	};
 
 	return (<div>
 		<h3>{title}</h3>
 		<div>
-			<input ref={inputRef} />
+			<input value={taskTitle} onChange={(e) => setTaskTitle(e.currentTarget.value)} />
 			<Button title={'+'}
-				onClick={() => {
-					if (inputRef.current) {
-						createTask(inputRef.current.value);
-						inputRef.current.value = '';
-					}
-				}} />
+				onClick={createTaskHandler} />
 		</div>
 		{tasks.length === 0 ? (
 				<p>Тасок нет</p>

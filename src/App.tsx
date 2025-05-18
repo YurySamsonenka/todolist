@@ -21,8 +21,6 @@ export const App = () => {
 		{ id: v1(), title: 'RTK query', isDone: false },
 	]);
 
-	debugger;
-
 	const [filter, setFilter] = useState<FilterValues>('all');
 
 	const deleteTask = (id: string) => {
