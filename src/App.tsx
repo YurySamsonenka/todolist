@@ -2,6 +2,7 @@ import './App.css';
 import { TodolistItem } from './TodolistItem.tsx';
 import { useState } from 'react';
 import { v1 } from 'uuid';
+import { CreateItemForm } from './CreateItemForm.tsx';
 
 export type Todolist = {
 	id: string
@@ -42,6 +43,13 @@ export const App = () => {
 		{ id: todolistId2, title: 'What to buy', filter: 'all' },
 	]);
 
+	const createTodolist = (title: string) => {
+		const todolistId = v1();
+		const newTodolist: Todolist = { id: todolistId, title, filter: 'all' };
+		setTodolists([newTodolist, ...todolists]);
+		setTasks({ ...tasks, [todolistId]: [] });
+	};
+
 	const deleteTask = (todolistId: string, taskId: string) => {
 		setTasks({ ...tasks, [todolistId]: tasks[todolistId].filter(task => task.id !== taskId) });
 	};
@@ -54,6 +62,7 @@ export const App = () => {
 
 	const createTask = (title: string, todolistId: string) => {
 		const newTask = { id: v1(), title, isDone: false };
+		console.log(tasks);
 		setTasks({ ...tasks, [todolistId]: [newTask, ...tasks[todolistId]] });
 	};
 
@@ -66,12 +75,26 @@ export const App = () => {
 
 	const deleteTodolist = (todolistId: string) => {
 		setTodolists(todolists.filter(todolist => todolist.id !== todolistId));
-		delete tasks[todolistId]
-		setTasks({ ...tasks })
+		delete tasks[todolistId];
+		setTasks({ ...tasks });
+	};
+
+	const changeTaskTitle = (todolistId: string, taskId: string, title: string) => {
+		setTasks({
+			...tasks,
+			[todolistId]: tasks[todolistId].map(task => task.id === taskId ? { ...task, title } : task),
+		});
+	};
+
+	const changeTodolistTitle = (todolistId: string, title: string) => {
+		setTodolists(todolists.map(todolist => todolist.id === todolistId
+			? { ...todolist, title }
+			: todolist));
 	};
 
 	return (
 		<div className="app">
+			<CreateItemForm onCreateItem={createTodolist} />
 			{todolists.map(todolist => {
 				const todolistTasks = tasks[todolist.id];
 				let filteredTasks = todolistTasks;
@@ -89,7 +112,9 @@ export const App = () => {
 					changeFilter={changeFilter}
 					createTask={createTask}
 					changeTaskStatus={changeTaskStatus}
-					deleteTodolist={deleteTodolist} />;
+					deleteTodolist={deleteTodolist}
+					changeTaskTitle={changeTaskTitle}
+					changeTodolistTitle={changeTodolistTitle} />;
 			})}
 		</div>
 	);

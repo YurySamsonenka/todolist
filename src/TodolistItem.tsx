@@ -1,6 +1,8 @@
 import { FilterValues, Task, Todolist } from './App.tsx';
 import { Button } from './Button.tsx';
-import { ChangeEvent, KeyboardEvent, useState } from 'react';
+import { ChangeEvent } from 'react';
+import { CreateItemForm } from './CreateItemForm.tsx';
+import { EditableSpan } from './EditableSpan.tsx';
 
 type Props = {
 	todolist: Todolist
@@ -10,6 +12,8 @@ type Props = {
 	createTask: (title: string, todolistId: string) => void
 	changeTaskStatus: (todolistId: string, taskId: string, isDone: boolean) => void
 	deleteTodolist: (todolistId: string) => void
+	changeTaskTitle: (todolistId: string, taskId: string, title: string) => void
+	changeTodolistTitle: (todolistId: string, title: string) => void
 }
 
 export const TodolistItem = ({
@@ -20,30 +24,11 @@ export const TodolistItem = ({
 	createTask,
 	changeTaskStatus,
 	deleteTodolist,
+	changeTaskTitle,
+	changeTodolistTitle,
 }: Props) => {
-	const [taskTitle, setTaskTitle] = useState('');
-	const [error, setError] = useState<string | null>(null);
-
-	const createTaskHandler = () => {
-		const trimmedTitle = taskTitle.trim();
-		if (trimmedTitle !== '') {
-			createTask(trimmedTitle, id);
-			setTaskTitle('');
-		} else {
-			setError('Title is required');
-		}
-	};
-
-	const changeTaskTitleHandler = (e: ChangeEvent<HTMLInputElement>) => {
-		setTaskTitle(e.currentTarget.value);
-		// Todo: сделать проверку на пустую строку, и только после этого вызывать setError(null)
-		setError(null);
-	};
-
-	const createTaskOnEnterHandler = (e: KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === 'Enter') {
-			createTaskHandler();
-		}
+	const createTaskHandler = (title: string) => {
+		createTask(title, id);
 	};
 
 	const changeFilterHandler = (filter: FilterValues) => {
@@ -54,19 +39,18 @@ export const TodolistItem = ({
 		deleteTodolist(id);
 	};
 
+	const changeTodolistTitleHandler = (title: string) => {
+		changeTodolistTitle(id, title);
+	};
+
 	return (<div>
 		<div className={'container'}>
-			<h3>{title}</h3>
+			<h3>
+				<EditableSpan value={title} onChange={changeTodolistTitleHandler} />
+			</h3>
 			<Button title={'x'} onClick={deleteTodolistHandler} />
 		</div>
-		<div>
-			<input value={taskTitle}
-				onChange={changeTaskTitleHandler}
-				onKeyDown={createTaskOnEnterHandler} />
-			<Button title={'+'}
-				onClick={createTaskHandler} />
-			{error && <div className={'error-message'}>{error}</div>}
-		</div>
+		<CreateItemForm onCreateItem={createTaskHandler} />
 		{tasks.length === 0 ? (
 				<p>Тасок нет</p>
 			) :
@@ -81,10 +65,14 @@ export const TodolistItem = ({
 						changeTaskStatus(id, task.id, newStatusValue);
 					};
 
+					const changeTaskTitleHandler = (title: string) => {
+						changeTaskTitle(id, task.id, title);
+					};
+
 					return (
 						<li key={task.id} className={task.isDone ? 'is-done' : ''}>
 							<input type="checkbox" checked={task.isDone} onChange={changeTaskStatusHandler} />
-							<span>{task.title}</span>
+							<EditableSpan value={task.title} onChange={changeTaskTitleHandler} />
 							<Button title={'x'} onClick={deleteTaskHandler} />
 						</li>
 					);
