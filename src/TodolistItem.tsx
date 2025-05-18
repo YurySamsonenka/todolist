@@ -1,6 +1,6 @@
 import { FilterValues, Task } from './App.tsx';
 import { Button } from './Button.tsx';
-import { useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useState } from 'react';
 
 type Props = {
 	title: string
@@ -13,15 +13,26 @@ type Props = {
 export const TodolistItem = ({ tasks, title, deleteTask, changeFilter, createTask }: Props) => {
 	const [taskTitle, setTaskTitle] = useState('');
 
-	const createTaskHandler =  () => {
+	const createTaskHandler = () => {
 		createTask(taskTitle);
 		setTaskTitle('');
 	};
 
+	function changeTaskTitleHandler(e: ChangeEvent<HTMLInputElement>) {
+		setTaskTitle(e.currentTarget.value);
+	}
+
+	const createTaskOnEnterHandler = (e: KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter') {
+			createTaskHandler();
+		}
+	};
 	return (<div>
 		<h3>{title}</h3>
 		<div>
-			<input value={taskTitle} onChange={(e) => setTaskTitle(e.currentTarget.value)} />
+			<input value={taskTitle}
+				onChange={changeTaskTitleHandler}
+				onKeyDown={createTaskOnEnterHandler} />
 			<Button title={'+'}
 				onClick={createTaskHandler} />
 		</div>
@@ -30,11 +41,15 @@ export const TodolistItem = ({ tasks, title, deleteTask, changeFilter, createTas
 			) :
 			(<ul>
 				{tasks.map(task => {
+					const deleteTaskHandler = () => {
+						deleteTask(task.id)
+					}
+
 					return (
 						<li key={task.id}>
 							<input type="checkbox" checked={task.isDone} />
 							<span>{task.title}</span>
-							<Button title={'x'} onClick={() => deleteTask(task.id)} />
+							<Button title={'x'} onClick={deleteTaskHandler} />
 						</li>
 					);
 				})}
