@@ -1,6 +1,5 @@
 import './App.css';
 import { TodolistItem } from '../TodolistItem.tsx';
-import { useState } from 'react';
 import { CreateItemForm } from '../CreateItemForm.tsx';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -11,7 +10,7 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Switch from '@mui/material/Switch';
 import CssBaseline from '@mui/material/CssBaseline';
-import { createTheme, ThemeProvider } from '@mui/material';
+import { ThemeProvider } from '@mui/material';
 import { containerSx } from '../TodolistItem.styles.ts';
 import { NavButton } from '../NavButton.ts';
 import { changeTodolistFilterAC, changeTodolistTitleAC, createTodolistAC, deleteTodolistAC } from '../model/todolists-reducer.ts';
@@ -20,6 +19,9 @@ import { useAppDispatch } from '../common/hooks/useAppDispatch.ts';
 import { useAppSelector } from '../common/hooks/useAppSelector.ts';
 import { selectTodolists } from '../model/todolists-selectors.ts';
 import { selectTasks } from '../model/tasks-selectors.ts';
+import { changeThemeModeAC } from './app-reducer.ts';
+import { selectThemeMode } from './app-selectors.ts';
+import { getTheme } from '../common/theme/theme.ts';
 
 export type Todolist = {
 	id: string
@@ -39,27 +41,18 @@ export type Task = {
 
 export type FilterValues = 'all' | 'active' | 'completed'
 
-type ThemeMode = 'dark' | 'light'
-
 export const App = () => {
 	const todolists = useAppSelector(selectTodolists);
 	const tasks = useAppSelector(selectTasks);
 
 	const dispatch = useAppDispatch();
 
-	const [themeMode, setThemeMode] = useState<ThemeMode>('light');
+	const themeMode = useAppSelector(selectThemeMode);
 
-	const theme = createTheme({
-		palette: {
-			mode: themeMode,
-			primary: {
-				main: '#ef6c00',
-			},
-		},
-	});
+	const theme = getTheme(themeMode);
 
 	const changeMode = () => {
-		setThemeMode(themeMode === 'light' ? 'dark' : 'light');
+		dispatch(changeThemeModeAC({ themeMode: themeMode === 'light' ? 'dark' : 'light' }));
 	};
 
 	const createTodolist = (title: string) => {
